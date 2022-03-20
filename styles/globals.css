@@ -1,3 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* .config > input[type="radio"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff;
+  margin: 0;
+} */
+
 html,
 body {
   padding: 0;
@@ -14,3 +25,4 @@ a {
 * {
   box-sizing: border-box;
 }
+
