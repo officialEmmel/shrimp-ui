@@ -3,7 +3,7 @@ import {useState, useEffect} from "react"
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-const ENDPOINT = "https://api.shrimp.emmelnet.systems";
+const ENDPOINT = "https://socket.emmelnet.systems";
 import socketIOClient from "socket.io-client";
 
 
