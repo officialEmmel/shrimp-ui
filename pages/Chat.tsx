@@ -3,7 +3,7 @@ import {useState, useEffect, useRef} from "react"
 
 import * as Icon from 'react-bootstrap-icons';
 
-import {Error} from './general'
+import Error from './general'
 
 import { motion, AnimatePresence } from "framer-motion"
 
