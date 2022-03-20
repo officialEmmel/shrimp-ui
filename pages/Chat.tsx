@@ -79,6 +79,10 @@ export default function Chat({socket, member, client, inChat}: any) {
     }
 
     let listHis = history.map((msg) => {
+        let cname 
+        try {cname = client.name; } catch (e) {cname = "-"}
+        let mname 
+        try {mname = member.name; } catch (e) {mname = "-"}
         return (
             <motion.li ref={messagesEndRef} key={msg.timestamp} initial={{y: "100vh"}} transition={{ type: "spring", damping: 15 }}  animate={{y: "0vh"}} className="flex">
                 {(msg.sender_id == client.id)?
@@ -98,6 +102,9 @@ export default function Chat({socket, member, client, inChat}: any) {
         )
     });
 
+
+    let mname 
+    try {mname = member.name; } catch (e) {mname = "-"}
 
 
     return (
