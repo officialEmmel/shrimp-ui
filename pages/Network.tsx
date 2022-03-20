@@ -18,12 +18,12 @@ export interface Member {
     color: string
 }
 
-export default function Network({socket}) {
-    const [client, setClient] = useState(null)
-    const [configured, setConfig] = useState(null)
-    const [connected, setConnection] = useState(false)
-    const [inChat, setInChat] = useState(false)
-    const [chat, setChat] = useState(null)
+export default function Network({socket}:any) {
+    const [client, setClient] = useState<any>(null)
+    const [configured, setConfig] = useState<any>(null)
+    const [connected, setConnection] = useState<any>(false)
+    const [inChat, setInChat] = useState<any>(false)
+    const [chat, setChat] = useState<any>(null)
 
     useEffect(()=>{
 
@@ -131,13 +131,13 @@ export default function Network({socket}) {
     )
 }
 
-export function Configurator({submit}) {
+export function Configurator({submit}:any) {
     const [oldConfig, setOldConfig] = useState({name:null,color:null})
-    const [name, setName] = useState(null)
-    const [color, setColor] = useState("normal")
+    const [name, setName] = useState<any>(null)
+    const [color, setColor] = useState<any>("normal")
 
     useEffect(()=>{
-        let c = getConfig()
+        let c: any = getConfig()
         if(c == null){setOldConfig({name:null,color:null});return}
         setOldConfig(c)
         if(c.name != null){setName(c.name)}
@@ -172,13 +172,13 @@ export function Configurator({submit}) {
     )
 }
 
-export function Tag({color, text}) {
+export function Tag({color, text}:any) {
     return (
         <div className={"bg-"+color+"-600 w-fit p-0.5 rounded inline m-1 py-0"}>{text}</div>
     )
 }
 
-export function Header({client, menu}) {
+export function Header({client, menu}:any) {
     return (
         <div className="flex mx-2 my-1 ">
             <Logo></Logo>
@@ -200,7 +200,7 @@ export function Logo() {
 }
 
 
-export function MainMenu({socket, client, openChat, openMenu}) {
+export function MainMenu({socket, client, openChat, openMenu}:any) {
     return (
         <div className="flex flex-col h-screen">
             <Header client={client} menu={openMenu}></Header>

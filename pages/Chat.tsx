@@ -7,15 +7,15 @@ import {Error} from './general'
 
 import { motion, AnimatePresence } from "framer-motion"
 
-export default function Chat({socket, member, client, inChat}) {
+export default function Chat({socket, member, client, inChat}: any) {
 
     const [history, setHistory] = useState<any[]>([])
-    const [loadHistory, setLoad] = useState(false)
-    const [message, setMessage] = useState(null)
+    const [loadHistory, setLoad] = useState<any>(false)
+    const [message, setMessage] = useState<any>(null)
 
     const [error, setError] = useState<any>(null)
 
-    const messagesEndRef = useRef(null)
+    const messagesEndRef = useRef<any>(null)
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })

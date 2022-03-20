@@ -5,7 +5,7 @@ import {Member} from "./Network"
 
 import * as Icon from 'react-bootstrap-icons';
 
-export default function MemberList({socket, client, openChat}){
+export default function MemberList({socket, client, openChat}: any){
     const [members, setMembers] = useState<Member[]>([])
     useEffect(() => {
       if(socket == null){return}
@@ -50,7 +50,7 @@ export default function MemberList({socket, client, openChat}){
   
 }
 
-function Item({member, client, openChat}) {
+function Item({member, client, openChat}: any) {
     return (        
         <div onClick={() => {openChat(member)}} className="w-fit text-center leading-loose mx-5">
           <div className="p-4 text-4xl bg-blue-600 text-white rounded-full w-fit mx-auto">

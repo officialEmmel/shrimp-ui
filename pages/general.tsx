@@ -1,6 +1,6 @@
 
 import { motion } from "framer-motion"
-export function Error({message}){
+export function Error({message}:any){
 
     let dropIn = {
         hidden: {
