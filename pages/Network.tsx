@@ -11,6 +11,8 @@ import Chat from './Chat'
 import {getConfig, getColor} from "../scripts/util"
 import { get } from 'https';
 
+import * as Peer from "simple-peer"
+
 
 export interface Member {
     name: string,
@@ -76,8 +78,11 @@ export default function Network({socket}:any) {
         socket.emit("get_members")
     }, [inChat])
 
-    let openChat = (member: any) => {
-        setChat(member)
+    let action = (key: any) => {
+        switch(key) {
+            case "text":
+
+        }
     }
 
     let setConf = (name: any, color: any) => {
@@ -122,7 +127,7 @@ export default function Network({socket}:any) {
                         {(inChat)?
                             <Chat socket={socket} member={chat} client={client} inChat={setInChat}></Chat>
                             : 
-                            <MainMenu socket={socket} client={client} openChat={openChat} openMenu={openMenu}></MainMenu>
+                            <MainMenu socket={socket} client={client} action={action} openMenu={openMenu}></MainMenu>
                         }
                     </div>
                 }
@@ -194,17 +199,17 @@ export function Logo() {
     return (
         <div className="text-3xl font-bold inline-flex items-middle"> 
         <Image className="invert dark:invert-0" alt="" src="/logo.svg" width="60" height="30"></Image>
-        <span className="font-mono dark:text-white ">SHRIMP;</span>
+        <span className="font-mono dark:text-white ">SHRIMP</span>
         </div>
     )
 }
 
 
-export function MainMenu({socket, client, openChat, openMenu}:any) {
+export function MainMenu({socket, client, action, openMenu}:any) {
     return (
         <div className="flex flex-col h-screen">
             <Header client={client} menu={openMenu}></Header>
-            <MemberList socket={socket} client={client} openChat={openChat}></MemberList>
+            <MemberList socket={socket} client={client} action={action}></MemberList>
         </div>
     )
 }

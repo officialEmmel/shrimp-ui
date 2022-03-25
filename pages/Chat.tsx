@@ -115,7 +115,7 @@ export default function Chat({socket, member, client, inChat}: any) {
                     <span className="mb-0 md:mb-0 dark:text-white" >{member.name}</span>
                 </div>
             </div>
-            <div className="overflow-auto">
+            <div className="overflow-auto flex-1">
                 <ul className="w-full flex flex-col space-y-2">
                     {listHis}
                 </ul>
