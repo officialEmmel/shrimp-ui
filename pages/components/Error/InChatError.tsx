@@ -1,6 +1,5 @@
-
 import { motion } from "framer-motion"
-export default function Error({message}:any){
+export default function InChatError({message}:any){
 
     let dropIn = {
         hidden: {
