@@ -1,3 +1,4 @@
+<img src="https://github.com/officialEmmel/shrimp-ui/blob/main/public/logo.svg" width="500"></img>
 # Shrimp
 
 ### A network wide peer-to-peer chat to share text & files across devices.
