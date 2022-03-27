@@ -4,7 +4,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 const DEVSERVER = false
-const ENDPOINT = DEVSERVER ? "http://192.168.178.65" : "https://socket.emmelnet.systems";
+const ENDPOINT = DEVSERVER ? "http://192.168.178.65:3001" : "https://socket.emmelnet.systems";
 import socketIOClient from "socket.io-client";
 
 
