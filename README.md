@@ -2,7 +2,7 @@
 
 ### A network wide peer-to-peer chat to share text & files across devices.
 
-![https://raw.githubusercontent.com/officialEmmel/shrimp-ui/main/rtc_con.png]()
+![https://raw.githubusercontent.com/officialEmmel/shrimp-ui/main/rtc_con.png](https://raw.githubusercontent.com/officialEmmel/shrimp-ui/main/rtc_con.png)
 
 # Made using:
 
