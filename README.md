@@ -12,6 +12,9 @@
 - [NextJS](https://nextjs.org/) with [Tailwind CSS](https://tailwindcss.com/) as frontend ([Motion Framer](https://www.framer.com/motion/) for animation)
 - FileChunker and FileDigester logic from [Snapdrop](https://snapdrop.net/)
 
+
 # How it works:
 
 Shrimp is using WebRTC protocol for text and file transfer. If a client connects it gets all other online clients from the server. To start a chat two peers start a WebRTC connection to transfer data over a DataChannel. The signaling between them is handled via WebSockets and an external backend server.
+
+### Backend Repo: [officialEmmel/shrimp-server](https://github.com/officialEmmel/shrimp-server)
