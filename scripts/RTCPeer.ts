@@ -167,7 +167,7 @@ export class RTCPeer {
     _onChunkReceived(chunk: any) {
       if(!chunk.byteLength) return;
       if(this._digester == undefined) {return}
-  
+
       this._digester.unchunk(chunk);
       const progress = this._digester.progress;
       this._onDownloadProgress(progress,this._digester._id);
