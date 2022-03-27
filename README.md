@@ -6,10 +6,10 @@
 
 # Made using:
 
-- WebRTC for Peer-to-Peer file and text transfer (simple-peer)
-- WebSockets for Signaling and client management in backend
-- NextJS with Tailwind CSS as frontend (Motion Framer for animation)
-- FileChunker and FileDigester logic from Snapdrop
+- [WebRTC](https://webrtc.org/) for Peer-to-Peer file and text transfer (simple-peer)
+- [WebSockets](https://developer.mozilla.org/de/docs/Web/API/WebSockets_API) for Signaling and client management in backend
+- [NextJS](https://nextjs.org/) with [Tailwind CSS](https://tailwindcss.com/) as frontend ([Motion Framer](https://www.framer.com/motion/) for animation)
+- FileChunker and FileDigester logic from [Snapdrop](https://snapdrop.net/)
 
 # How it works:
 
