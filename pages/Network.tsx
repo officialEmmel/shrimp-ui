@@ -9,12 +9,12 @@ import Image from 'next/image'
 import Configurator from "./components/Settings/ConfigModal"
 
 import MemberList from './MemberList'
-import Chat from './Chat'
 import {getConfig, getColor} from "../scripts/util"
 import { get } from 'https';
 
 import * as Peer from "simple-peer"
-
+import Loading from './components/Loading';
+import Error from "./components/Error/ErrorModal"
 
 export interface Member {
     name: string,
@@ -26,8 +26,8 @@ export default function Network({socket}:any) {
     const [client, setClient] = useState<any>(null)
     const [configured, setConfig] = useState<any>(null)
     const [connected, setConnection] = useState<any>(false)
-    const [inChat, setInChat] = useState<any>(false)
-    const [chat, setChat] = useState<any>(null)
+
+    const [error, setError] = useState<any>(null)
 
     useEffect(()=>{
 
@@ -70,22 +70,13 @@ export default function Network({socket}:any) {
         };
     }, [configured])
 
-    useEffect(()=>{
-        if(chat == null){ return}
-        setInChat(true)
-    }, [chat])
-
-    useEffect(()=>{
-        if(socket == null) {return}
-        socket.emit("get_members")
-    }, [inChat])
-
     let action = (key: any) => {
         switch(key) {
             case "text":
 
         }
     }
+
 
     let setConf = (name: any, color: any) => {
         if (typeof window == 'undefined') {return null}
@@ -115,6 +106,7 @@ export default function Network({socket}:any) {
                 <meta name="msapplication-TileColor" content="#931c3d"/>
                 <meta name="theme-color" content="#ffffff"/>
             </Head>
+            {(error != null)?<Error message={error.msg} title={error.title} hide={() => {setError(null)}}></Error>:null}
             {(client == null) ? <Skeleton></Skeleton> : null}
             {(configured != null && !configured)?
                 <Configurator submit={setConf}></Configurator>
@@ -123,14 +115,15 @@ export default function Network({socket}:any) {
             }
             <div>
                 {(client == null) ? 
-                    <h1>Connecting...</h1>
+                    <div className="flex flex-1 flex-col justify-center items-center h-screen gap-4">
+                        <div className="w-fit text-center leading-loose mx-5">
+                            <Loading></Loading>
+                        <div className="text-xl w-fit p-5 dark:text-white ">Verbinden...</div>
+                    </div>
+                </div>
                     :
                     <div>
-                        {(inChat)?
-                            <Chat socket={socket} member={chat} client={client} inChat={setInChat}></Chat>
-                            : 
-                            <MainMenu socket={socket} client={client} action={action} openMenu={openMenu}></MainMenu>
-                        }
+                        <MainMenu setError={setError} socket={socket} client={client} action={action} openMenu={openMenu}></MainMenu>
                     </div>
                 }
             </div>
@@ -161,11 +154,11 @@ export function Logo() {
 }
 
 
-export function MainMenu({socket, client, action, openMenu}:any) {
+export function MainMenu({socket, client, action, openMenu, setError}:any) {
     return (
         <div className="flex flex-col h-screen">
             <Header client={client} menu={openMenu}></Header>
-            <MemberList socket={socket} client={client} action={action}></MemberList>
+            <MemberList setError={setError} socket={socket} client={client} action={action}></MemberList>
         </div>
     )
 }

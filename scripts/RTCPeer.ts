@@ -67,6 +67,7 @@ export class RTCPeer {
         console.log('rtc connection closed') //DEBUG
         this.connected = false
         Events.fire("close", this)
+        Events.fire("disconnect",{id:this.remote.id})
       })
   
       Events.on("send-text", (t) => {
@@ -172,6 +173,8 @@ export class RTCPeer {
       this._onDownloadProgress(progress,this._digester._id);
   
       // occasionally notify sender about our progress
+      if(progress==undefined) {return}
+      if(this._lastProgress==undefined) {return}
       if (progress - this._lastProgress < 0.01) return;
       this._lastProgress = progress;
       this._sendProgress(progress, this._digester._id);
@@ -259,7 +262,7 @@ export class RTCPeer {
             Events.fire("append-history",null)
           }, TIME, data.id)
         }
-        if(window.isDownloadSupported) {
+        if(!this.iOS()) {
           obj.dataURL = URL.createObjectURL(data.blob)
           data.blob = null
           this.history.push(obj)
@@ -281,6 +284,19 @@ export class RTCPeer {
         Events.fire("append-history",null)
       }
   
+    }
+
+    iOS() {
+      return [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+      ].includes(navigator.platform)
+      // iPad on iOS 13 detection
+      || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
     }
   
     _onTextReceived(message: any) {

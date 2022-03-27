@@ -17,7 +17,7 @@ export class FileChunker {
         this._onChunk = onChunk;
         this._onPartitionEnd = onPartitionEnd;
         this._reader = new FileReader();
-        this._reader.addEventListener('load', e => this._onChunkRead(e.target.result));
+        this._reader.addEventListener('load', e => {if(e.target==null) {return};this._onChunkRead(e.target.result)});
     }
   
     nextPartition() {
@@ -27,7 +27,7 @@ export class FileChunker {
   
     _readChunk() {
         const chunk = this._file.slice(this._offset, this._offset + this._chunkSize);
-        this._reader.readAsArrayBuffer(chunk);
+        try {this._reader.readAsArrayBuffer(chunk);} catch (e) {console.log(e)}
     }
   
     _onChunkRead(chunk: any) {

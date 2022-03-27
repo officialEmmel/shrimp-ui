@@ -26,7 +26,7 @@ export default function Loading() {
         <motion.div  
         animate="anim"
         variants={variants}
-        className="bg-white w-5 h-5 rounded-full p-4 text-4xl text-white  mx-auto" >
+        className="dark:bg-white bg-black w-5 h-5 rounded-full p-4 text-4xl text-white  mx-auto" >
         </motion.div>
     )
 }

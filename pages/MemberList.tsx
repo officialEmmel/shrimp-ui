@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import {useState, useEffect} from "react"
+import {useState, useEffect, useCallback} from "react"
 
 import {Member} from "./Network"
 
@@ -20,15 +20,30 @@ import {FileChunker} from '../scripts/FileChunker'
 import {FileDigester} from '../scripts/FileDigester'
 import {Events} from '../scripts/Events'
 
-export default function MemberList({socket, client, action}: any){
+import {useDropzone} from 'react-dropzone'
+
+import { useRouter } from 'next/router'
+import MemberModal from './components/ShareModal';
+
+export default function MemberList({socket, client, action, setError}: any){
     const [members, setMembers] = useState<Member[] | null>(null)
 
     const [peers, setPeers] = useState<RTCPeer[]>([])
 
     const [space, setSpace] = useState<any | null>(null)
 
+    const [shareMode, setMode] = useState<any>(false)
+    const [inputFile, setInput] = useState<any | null>(null)
+
+    const router = useRouter()
+
     useEffect(()=>{
       if(socket === null) {return}
+
+      if(router.query.file !== undefined) {
+        setInput(dataURLtoFile(router.query.file, router.query.filename))
+      }
+
       console.log("subscrubing to event listeners")
 
       Events.on("offer", (data: any) => {
@@ -39,8 +54,7 @@ export default function MemberList({socket, client, action}: any){
         socket.emit("accept",{sgn:data.detail.sgn,to:data.detail.to, from:data.detail.from})
       })
 
-      Events.on("close", (data: any) => {
-      })
+      Events.on("error", onError)
 
       return () => {
         console.log("desubscribint to old event listeners")
@@ -48,8 +62,33 @@ export default function MemberList({socket, client, action}: any){
         Events.off("accept", (e)=>{})
         Events.off("data", (e)=>{})
         Events.off("close", (e)=>{})
+        Events.off("error", onError)
       };
     },[socket])
+
+    let onError = (e:any) => {
+      if(e.detail.err.toString() == "OperationError: Transport channel closed") {return}
+      setError({msg:<div><div>{e.detail.err.toString() + " (Peer: "+e.detail.id+") "}</div><a
+        href="https://github.com/officialEmmel/shrimp-ui/blob/main/common_errors.md"
+        className='underline text-blue-600'>
+        Warum sehe ich diesen fehler?</a>
+      </div>, title:"Ein WebRTC Fehler ist aufgetreten!"})
+    }
+
+    let dataURLtoFile = (dataurl:any, filename:any) => {
+ 
+      var arr = dataurl.split(','),
+          mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]), 
+          n = bstr.length, 
+          u8arr = new Uint8Array(n);
+          
+      while(n--){
+          u8arr[n] = bstr.charCodeAt(n);
+      }
+      
+      return new File([u8arr], filename, {type:mime});
+    }
 
     useEffect(() => {
       console.log("refreshing peers...")
@@ -121,13 +160,15 @@ export default function MemberList({socket, client, action}: any){
 
 
     let quickSpace = (files: any, member:any) => {
+      //init connection if needed
       let peer: RTCPeer | null = getPeer(member.id)
-        if(peer == null) {
-          peer = initPeer(member)
-          if(peer == null){console.log("ERROR: bruh");return}
-        }
-        console.log("adding peers to RTCPeer...")
-        peer.sendFiles(files)
+      if(peer == null) {
+        peer = initPeer(member)
+        if(peer == null){console.log("ERROR: bruh");return}
+      }
+      //sending files
+      peer.sendFiles(files)
+      setSpace(peer)
     }
 
     let openSpace = (member:any) => {
@@ -168,8 +209,8 @@ export default function MemberList({socket, client, action}: any){
     useEffect(() => {
       if(socket == null){return}
       socket.on("offer", (data:any) => {
-        console.log("got offer from " + data.from)
-        if(hasPeer(data.from)) {console.log("got offer from " + data.from + " but already have a peer with that client")}
+        console.log("got offer from " + data.from.id)
+        if(hasPeer(data.from.id)) {console.log("got offer from " + data.from.id + " but already have a peer with that client"); return}
         acceptPeer(data)
       })
       socket.on("accept", (data: any) => {
@@ -187,27 +228,6 @@ export default function MemberList({socket, client, action}: any){
       };
     }, [socket, peers])
 
-    let variants = {
-      anim: {
-        x: [-30,30],
-        opacity: [0,1,0],
-        scale: [0,1,0],
-        transition: {
-          x: {
-            yoyo: Infinity,
-            duration: 0.5
-          },
-          opacity: {
-            yoyo: Infinity,
-            duration: 0.5
-          },
-          scale: {
-            yoyo: Infinity,
-            duration: 0.5
-          }
-        }
-      }
-    }
 
     if(members == null){return (
       <div className="flex flex-1 flex-col justify-center items-center h-full gap-4">
@@ -218,13 +238,16 @@ export default function MemberList({socket, client, action}: any){
       </div>
     )}
     if(client == null){return <h1>lel</h1>}
-    const listItems = members.map((member) =>  <Item socket={socket} action={openSpace} key={member.id}member={member} client={client}></Item>);
+    const listItems = members.map((member) =>  <Item socket={socket} action={openSpace} drop={quickSpace} key={member.id}member={member} client={client}></Item>);
     return (
       <div className="flex flex-1 flex-col justify-center items-center h-full gap-4">
         {(members.length > 0) ?
             <div>
+              {shareMode?
+                <MemberModal members={members} send={(member:any) => quickSpace(inputFile,member)}></MemberModal>
+              :null}
               {(space != null) ?
-                <Space peer={space} setPeer={(s:any) => {setSpace(s)}}>
+                <Space setError={setError} peer={space} setPeer={(s:any) => {setSpace(s)}}>
 
                 </Space>
                 :
@@ -244,23 +267,25 @@ export default function MemberList({socket, client, action}: any){
 
 }
 
-function Item({socket, member, client, action, state}: any) {
-  const [menu, showMenu] = useState(false)
+function Item({socket, member, client, action, state, drop}: any) {
 
-
-
-  let toogleMenu = () => {
-    if(menu) {
-      showMenu(false)
-    } else {showMenu(true)}
+  const onDrop = (acceptedFiles: any) => {
+    console.log("dropped")
+    drop(acceptedFiles, member)
   }
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
+
     return (
-        <motion.div className="w-fit text-center leading-loose mx-5">
-          <div onClick={() => {action(member)}} className="p-4 text-4xl bg-blue-600 text-white rounded-full w-fit mx-auto">
-            <Icon.Person className="mx-auto"></Icon.Person>
+        <div className="w-fit text-center leading-loose mx-5">
+          <div {...getRootProps()} onClick={() => {action(member)}} className="p-4 text-4xl bg-blue-600 text-white rounded-full w-fit mx-auto">
+              {
+              isDragActive ?
+                <motion.div className="mx-auto"><Icon.Plus className="mx-auto"></Icon.Plus></motion.div>:
+                <Icon.Person className="mx-auto"></Icon.Person>
+              }
           </div>
           <p className="font-bold text-lg mt-1 dark:text-white ">{member.name}</p>
           {/* {(state != null)?<div>{state.name}</div>:null} */}
-        </motion.div>
+        </div>
     )
 }

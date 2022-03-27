@@ -10,10 +10,12 @@ import {getImageDimensions} from "../../scripts/util"
 import Loading from "./Loading";
 
 import {Events} from '../../scripts/Events'
+import { useDropzone } from "react-dropzone";
 
-export default function Space({peer, setPeer}:any) {
-    const [history, setHistory] = useState<any>(peer.getHistory());
-    const [state, setState] = useState<any>(peer.state)
+export default function Space({peer, setPeer, setError}:any) {
+
+    const [history, setHistory] = useState<any>([]);
+    const [state, setState] = useState<any>("")
     const [message, setMessage] = useState<any>("")
 
     const [chatErr, setChatErr] = useState<any>(null)
@@ -27,9 +29,14 @@ export default function Space({peer, setPeer}:any) {
     scrollToBottom()
     }, [history]);
     useEffect(() => {
+        if(peer == undefined || peer == null) {return}
+        setHistory(peer.getHistory())
+        setState(peer.state)
 
         Events.on("append-history", append)
         Events.on("state-changed",updateState)
+        Events.on("error", onError)
+        Events.on("disconnect", onDisconnect)
         
         return () => {
             Events.off("history", (e)=>{})
@@ -50,6 +57,15 @@ export default function Space({peer, setPeer}:any) {
     let updateState = (e:any) => {
         let s = peer.state
         setState(s);
+    }
+
+    let onDisconnect = (e:any) => {
+        if(e.detail.id == peer.remote.id) {setPeer(null)}
+    }
+
+    let onError = (e:any) => {
+        //setError({msg:"Die Verbindung zu "+peer.remote.name+" wurde verloren. Bitte versuche es erneut.", title:"Verbindung verloren"});setPeer(null)
+        if(e.detail.id == peer.remote.id) {setPeer(null)}
     }
 
 
@@ -97,6 +113,7 @@ export default function Space({peer, setPeer}:any) {
             }
         }
 
+        let time = new Date(msg.timestamp).toLocaleTimeString().split(":")
 
         return (
             <motion.li key={msg.timestamp} ref={messagesEndRef} initial={{scale: 0}} transition={{ type: "spring", damping: 15 }}  animate={{scale: 1}} className="flex">
@@ -104,16 +121,24 @@ export default function Space({peer, setPeer}:any) {
                 <div className=" px-4 py-2 text-gray-700 dark:text-gray-200 rounded max-w-full">
                     <span className="block text-blue-500 font-bold ">{peer.local.name}</span>
                     {content(msg)}
+                    <span className="block font-thin text-xs mt-1">{time[0]+":"+time[1]}</span>
                 </div>
                 :
                 <div className=" px-4 py-2 text-gray-700 rounded dark:text-gray-200 max-w-full w-fit">
                     <span className="block text-red-500 font-bold">{peer.remote.name}</span>
                     {content(msg)}
+                    <span className="block font-thin text-xs mt-1">{time[0]+":"+time[1]}</span>
                 </div>
                 }
             </motion.li>
         )
     });
+
+    const onDrop = (acceptedFiles: any) => {
+        console.log("dropped")
+        peer.sendFiles(acceptedFiles)
+      }
+    const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
 
     return (
         <Backdrop onClick={() => {setPeer(null);}}>
@@ -139,7 +164,7 @@ export default function Space({peer, setPeer}:any) {
                             </div>
                         </div>
                     </div>
-                    <div className="overflow-y-auto  flex-1">
+                    <div {...getRootProps({onClick: (e) => {e.stopPropagation();}})} className="overflow-y-auto  flex-1">
                         <ul className="w-full flex flex-col space-y-2">
                             {listHis}
                         </ul>
@@ -159,6 +184,7 @@ export default function Space({peer, setPeer}:any) {
                 <div className="w-fit text-center leading-loose mx-5">
                   <Loading></Loading>
                   <div className="text-xl w-fit p-5 dark:text-white ">{state}</div>
+                  <button onClick={() => {setPeer(null)}}className="w-fit bg-blue-600 px-2 rounded-lg">Ausblenden</button>
                 </div>
                 </div>
             }
@@ -231,7 +257,7 @@ export function NonImage({file, formatSize}:any) {
         <div className="inline-flex text-xl  text-white rounded-full w-fit  mr-2">
             <FileIcon mime={file.data.mime}></FileIcon>
         </div>
-        <a className="mt- md:mb-0 dark:text-white" href={file.dataURL} target="_blank" download={file.data.name} rel="noreferrer">
+        <a className="mt- md:mb-0 dark:text-white hover:underline" href={file.dataURL} target="_blank" download={file.data.name} rel="noreferrer">
             {file.data.name}
             <div className="text-gray-300 text-sm">{formatSize(file.data.size)}</div>
         </a>
@@ -252,7 +278,7 @@ export function ImageFile({file, formatSize}:any) {
     return (
     <div className="mt-1 p-2 align-middle items-middle">
         <Image src={file.dataURL} width={dim.w} height={dim.h}></Image>
-        <a className="block md:mb-0 dark:text-white" href={file.dataURL} target="_blank" download={file.data.name} rel="noreferrer">
+        <a className="block md:mb-0 dark:text-white hover:underline" href={file.dataURL} target="_blank" download={file.data.name} rel="noreferrer">
             {file.data.name}
             <div className="text-gray-300 text-sm">{formatSize(file.data.size)}</div>
         </a>
