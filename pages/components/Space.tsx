@@ -84,9 +84,9 @@ export default function Space({peer, setPeer, setError}:any) {
         for (let i = 0; i < e.target.files.length; i++) {
             const f = e.target.files[i]
             if(f.size == 0) {showError("Die Datei ist 0 Bytes groß"); return}
-            if(f.size > 5e7) {
-                showError("Die maximale Dateigröße beträgt 50 MB"); return
-            }
+            // if(f.size > 5e7) {
+            //     showError("Die maximale Dateigröße beträgt 50 MB"); return
+            // }
         }
         peer.sendFiles(e.target.files)
         setMessage("")
@@ -242,8 +242,8 @@ export function File({file, peer, showError}:any) {
             }
         </div>
         }
-        {(file.timeout)?<div className="w-full text-sm font-thin p-2 bg-orange-700 rounded-b-lg">Diese Datei wird aus Performancegründen in <b className="font-bold">{Math.round(delTime/1000)}</b> Sekunden gelöscht, da sie über 10 MB groß ist. Große Dateien sind für Shrimp nicht geeignet.</div>:null}
-        {(file.warning)?<div className="w-full text-sm font-thin p-2 bg-orange-700 rounded-b-lg">Dateien sollten nicht größer als 10 MB sein, da die Website- und Browserperformance sonst stark darunter leidet.</div>:null}
+        {/* {(file.timeout)?<div className="w-full text-sm font-thin p-2 bg-orange-700 rounded-b-lg">Diese Datei wird aus Performancegründen in <b className="font-bold">{Math.round(delTime/1000)}</b> Sekunden gelöscht, da sie über 10 MB groß ist. Große Dateien sind für Shrimp nicht geeignet.</div>:null}
+        {(file.warning)?<div className="w-full text-sm font-thin p-2 bg-orange-700 rounded-b-lg">Dateien sollten nicht größer als 10 MB sein, da die Website- und Browserperformance sonst stark darunter leidet.</div>:null} */}
         {
             (progress == 1)?null:
             <progress className="w-full align-bottom rounded-b-md" value={progress}></progress>

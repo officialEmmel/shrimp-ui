@@ -240,7 +240,8 @@ export class RTCPeer {
       if(type === 'data') {
         obj.timeout = false
         if(sender.id == this.local.id) {
-          if(obj.data.size> 1e7){obj.warning = true}
+          //disable for testing
+          //if(obj.data.size> 1e7){obj.warning = true}
           this.history.push(obj)
           Events.fire("append-history",null)
           return
@@ -250,17 +251,17 @@ export class RTCPeer {
           console.log("too largeeeee")
           obj.timeout = true
           obj.deletingTime = Date.now() + TIME
-          setTimeout((id:any) => {
-            let r: any= null
-            for (let i = 0; i < this.history.length; i++) {
-              const e = this.history[i];
-              if(e.data.id == id) {r = i; break}
-            }
-            if(r == null) {console.log("not found lol"); return}
-            console.log("deleting lol")
-            this.history.splice(r,1)
-            Events.fire("append-history",null)
-          }, TIME, data.id)
+          // setTimeout((id:any) => {
+          //   let r: any= null
+          //   for (let i = 0; i < this.history.length; i++) {
+          //     const e = this.history[i];
+          //     if(e.data.id == id) {r = i; break}
+          //   }
+          //   if(r == null) {console.log("not found lol"); return}
+          //   console.log("deleting lol")
+          //   this.history.splice(r,1)
+          //   Events.fire("append-history",null)
+          // }, TIME, data.id)
         }
         if(!this.iOS()) {
           obj.dataURL = URL.createObjectURL(data.blob)
