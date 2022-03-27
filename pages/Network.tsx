@@ -6,13 +6,15 @@ import * as Icon from 'react-bootstrap-icons';
 import Head from 'next/head'
 import Image from 'next/image'
 
+import Configurator from "./components/Settings/ConfigModal"
+
 import MemberList from './MemberList'
-import Chat from './Chat'
 import {getConfig, getColor} from "../scripts/util"
 import { get } from 'https';
 
 import * as Peer from "simple-peer"
-
+import Loading from './components/Loading';
+import Error from "./components/Error/ErrorModal"
 
 export interface Member {
     name: string,
@@ -24,8 +26,8 @@ export default function Network({socket}:any) {
     const [client, setClient] = useState<any>(null)
     const [configured, setConfig] = useState<any>(null)
     const [connected, setConnection] = useState<any>(false)
-    const [inChat, setInChat] = useState<any>(false)
-    const [chat, setChat] = useState<any>(null)
+
+    const [error, setError] = useState<any>(null)
 
     useEffect(()=>{
 
@@ -68,22 +70,13 @@ export default function Network({socket}:any) {
         };
     }, [configured])
 
-    useEffect(()=>{
-        if(chat == null){ return}
-        setInChat(true)
-    }, [chat])
-
-    useEffect(()=>{
-        if(socket == null) {return}
-        socket.emit("get_members")
-    }, [inChat])
-
     let action = (key: any) => {
         switch(key) {
             case "text":
 
         }
     }
+
 
     let setConf = (name: any, color: any) => {
         if (typeof window == 'undefined') {return null}
@@ -113,6 +106,7 @@ export default function Network({socket}:any) {
                 <meta name="msapplication-TileColor" content="#931c3d"/>
                 <meta name="theme-color" content="#ffffff"/>
             </Head>
+            {(error != null)?<Error message={error.msg} title={error.title} hide={() => {setError(null)}}></Error>:null}
             {(client == null) ? <Skeleton></Skeleton> : null}
             {(configured != null && !configured)?
                 <Configurator submit={setConf}></Configurator>
@@ -121,14 +115,15 @@ export default function Network({socket}:any) {
             }
             <div>
                 {(client == null) ? 
-                    <h1>Connecting...</h1>
+                    <div className="flex flex-1 flex-col justify-center items-center h-screen gap-4">
+                        <div className="w-fit text-center leading-loose mx-5">
+                            <Loading></Loading>
+                        <div className="text-xl w-fit p-5 dark:text-white ">Verbinden...</div>
+                    </div>
+                </div>
                     :
                     <div>
-                        {(inChat)?
-                            <Chat socket={socket} member={chat} client={client} inChat={setInChat}></Chat>
-                            : 
-                            <MainMenu socket={socket} client={client} action={action} openMenu={openMenu}></MainMenu>
-                        }
+                        <MainMenu setError={setError} socket={socket} client={client} action={action} openMenu={openMenu}></MainMenu>
                     </div>
                 }
             </div>
@@ -136,52 +131,6 @@ export default function Network({socket}:any) {
     )
 }
 
-export function Configurator({submit}:any) {
-    const [oldConfig, setOldConfig] = useState({name:null,color:null})
-    const [name, setName] = useState<any>(null)
-    const [color, setColor] = useState<any>("normal")
-
-    useEffect(()=>{
-        let c: any = getConfig()
-        if(c == null){setOldConfig({name:null,color:null});return}
-        setOldConfig(c)
-        if(c.name != null){setName(c.name)}
-        if(c.color != null){setColor(c.color)}
-    }, [])
-
-    return (
-        <div className="fixed inset-0 bg-gray-600 dark:bg-neutral-900 bg-opacity-50 overflow-y-auto h-full w-full">
-            <div className="relative w-auto top-20 mx-auto p-5 max-w-md rounded-md bg-gray-100 dark:bg-[#121212]">
-                <form className=" px-6 pb-4 space-y-6 " action="#">
-                    <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100">Profil konfigurieren</h3>
-                    <div>
-                        <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Name</label>
-                        <input type="text" name="name" id="name" onChange={(e) => {setName(e.target.value)}} className="bg-gray-50 dark:text-white dark:bg-neutral-700  text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " placeholder={(oldConfig.name != null)?oldConfig.name:"Rick Astley"} defaultValue={(oldConfig.name != null)?oldConfig.name:""} required/>
-                    </div>
-                    <div>
-                        <label htmlFor="color" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Farbe</label>
-                        <select id="countries" onChange={(e) => {setColor(e.target.value)}} className="bg-gray-50 dark:bg-neutral-700 text-gray-900 dark:text-white  text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " value={(color != null)?color:"normal"}>
-                        <option value="normal" >Keine</option>
-                        <option value="blue" >Blau</option>
-                        <option value="green" >Grün</option>
-                        <option value="yellow" >Gelb</option>
-                        <option value="orange" >Orange</option>
-                        <option value="red" >Rot</option>
-                        </select>
-                    </div>
-                    <button type="submit" onClick={() => {if(name != null){submit(name, color)}}} className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ">Fortfahren</button>
-                </form>
-            </div>
-        </div>
-        
-    )
-}
-
-export function Tag({color, text}:any) {
-    return (
-        <div className={"bg-"+color+"-600 w-fit p-0.5 rounded inline m-1 py-0"}>{text}</div>
-    )
-}
 
 export function Header({client, menu}:any) {
     return (
@@ -205,11 +154,11 @@ export function Logo() {
 }
 
 
-export function MainMenu({socket, client, action, openMenu}:any) {
+export function MainMenu({socket, client, action, openMenu, setError}:any) {
     return (
         <div className="flex flex-col h-screen">
             <Header client={client} menu={openMenu}></Header>
-            <MemberList socket={socket} client={client} action={action}></MemberList>
+            <MemberList setError={setError} socket={socket} client={client} action={action}></MemberList>
         </div>
     )
 }
