@@ -7,6 +7,7 @@ const DEVSERVER = false
 const ENDPOINT = DEVSERVER ? "http://192.168.178.65:3001" : "https://socket.emmelnet.systems";
 import socketIOClient from "socket.io-client";
 
+//test
 
 import Network from "./Network"
 
